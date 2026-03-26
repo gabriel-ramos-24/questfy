@@ -8,7 +8,7 @@ export default {
     if (url.pathname.startsWith("/user"))
       return routeUser(request, env);
 
-    return Response.json({ mensagem: "Rota inexistente..." }, { status: 404 });
+    return Response.json({ mensagem: "Rota inexistente." }, { status: 404 });
 
   }
 };
