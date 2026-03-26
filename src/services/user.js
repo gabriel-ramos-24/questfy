@@ -1,5 +1,5 @@
-import { emailValido, nomeValido, senhaValida } from '../utils/user.js';
-import { codigoValido, tokenValido, hashSenha, verificarSenha } from '../utils/auth.js';
+import { emailValido, nomeValido, codigoValido, senhaValida } from '../utils/user.js';
+import { tokenValido, hashSenha, verificarSenha } from '../utils/auth.js';
 import { criarUsuario, existeUsuario, obterSenhaHash } from '../db/database.js';
 
 
