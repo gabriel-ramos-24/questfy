@@ -8,6 +8,12 @@ export function nomeValido(nome) {
     return regexNome.test(nome);
 }
 
+export function codigoValido(codigo) {
+    const regexCodigo = /^\d{6}$/;
+
+    return regexCodigo.test(codigo);
+}
+
 export function senhaValida(senha) {
     const regexLetra = /[A-Za-z]/;
     const regexNumero = /[0-9]/;
