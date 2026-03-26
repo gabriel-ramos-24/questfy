@@ -12,9 +12,9 @@ export async function existeUsuario(email, env) {
     }
 }
 
-export async function criarUsuario(dados, hash, salt, env) {
+export async function criarUsuario(dados, senhaCriptografada, env) {
     try {
-        await env.DB.prepare("INSERT INTO users (email, nome, hash, salt) VALUES (?, ?, ?, ?)").bind(dados.email, dados.nome, hash, salt).run();
+        await env.DB.prepare("INSERT INTO users (email, nome, senha) VALUES (?, ?, ?)").bind(dados.email, dados.nome, senhaCriptografada).run();
         return { body: { mensagem: "Cadastro efetuado com sucesso!"}, status: 201 };
 
     } catch (error) {
@@ -23,9 +23,9 @@ export async function criarUsuario(dados, hash, salt, env) {
     }
 }
 
-export async function obterSaltHash(email, env) {
+export async function obterSenhaHash(email, env) {
     try {
-        return env.DB.prepare("SELECT salt, hash FROM users WHERE email = ?").bind(email).first();
+        return env.DB.prepare("SELECT senha FROM users WHERE email = ?").bind(email).first();
 
     } catch (error) {
         console.error("Erro ao obter dados do salt e hash do usuário: ", error);

@@ -1,73 +1,11 @@
+import bcrypt from "bcryptjs";
+
 export async function hashSenha(senha) {
-  const encoder = new TextEncoder();
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(senha),
-    { name: "PBKDF2" },
-    false,
-    ["deriveBits"]
-  );
-
-  const derivedBits = await crypto.subtle.deriveBits(
-    {
-      name: "PBKDF2",
-      salt,
-      iterations: 100000,
-      hash: "SHA-256",
-    },
-    key,
-    256
-  );
-
-  return {
-    hash: bufferToHex(derivedBits),
-    salt: bufferToHex(salt),
-  };
+  return await bcrypt.hash(senha, 10);
 }
 
-function bufferToHex(buffer) {
-  return Array.from(new Uint8Array(buffer))
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-export async function verificarSenha(senha, saltHex, hashOriginal) {
-  const encoder = new TextEncoder();
-
-  const salt = hexToBuffer(saltHex);
-
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(senha),
-    { name: "PBKDF2" },
-    false,
-    ["deriveBits"]
-  );
-
-  const derivedBits = await crypto.subtle.deriveBits(
-    {
-      name: "PBKDF2",
-      salt,
-      iterations: 100000,
-      hash: "SHA-256",
-    },
-    key,
-    256
-  );
-
-  const novoHash = bufferToHex(derivedBits);
-
-  return novoHash === hashOriginal;
-}
-
-function hexToBuffer(hex) {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < bytes.length; i++) {
-    bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
-  }
-  return bytes;
+export async function verificarSenha(senha, hash) {
+  return await bcrypt.compare(senha, hash);
 }
 
 export function codigoValido(codigo) {

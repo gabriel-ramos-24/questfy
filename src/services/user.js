@@ -1,6 +1,6 @@
 import { emailValido, nomeValido, senhaValida } from '../utils/user.js';
 import { codigoValido, tokenValido, hashSenha, verificarSenha } from '../utils/auth.js';
-import { criarUsuario, existeUsuario, obterSaltHash } from '../db/database.js';
+import { criarUsuario, existeUsuario, obterSenhaHash } from '../db/database.js';
 
 
 export async function getUser(userData, env) {
@@ -19,8 +19,8 @@ export async function getUser(userData, env) {
     if (!existe) return { body: { mensagem: "Email ou senha incorretos." }, status: 404 };
 
     // 4° passo: A senha está correta?
-    const { salt, hash } = await obterSaltHash(userData.email, env);
-    const senhaValida = await verificarSenha(userData.senha, salt, hash);
+    const senhaHash = await obterSenhaHash(userData.email, env);
+    const senhaValida = await verificarSenha(userData.senha, senhaHash);
     if (!senhaValida) return { body: { mensagem: "Email ou senha incorretos." }, status: 400 };
 
     // 5° passo: O token está válido?
@@ -56,8 +56,8 @@ export async function createUser(userData, env) {
     const boolToken = await tokenValido(userData.token, userData.codigo);
     if (!boolToken) return { body: { mensagem: "Token inválido" }, status: 400 };
 
-    // 7° passo: transformar senha em hash+salt
-    const { hash, salt } = await hashSenha(userData.senha);
+    // 7° passo: transformar senha usando bcryptjs
+    const senhaCriptografada = await hashSenha(userData.senha);
 
     // 8° passo: verificar duplicidade de usuário
     const { existe, status } = await existeUsuario(userData.email, env);
@@ -65,7 +65,7 @@ export async function createUser(userData, env) {
     if (existe) return { body: { mensagem: "Não foi possível realizar o cadastro." }, status: 409 };
 
     // 9° passo: Criar usuário
-    return criarUsuario(userData, hash, salt, env);
+    return criarUsuario(userData, senhaCriptografada, env);
 }
 
 export function pathUser(userData, env) {
