@@ -1,0 +1,16 @@
+{
+	"compatibility_date": "2025-10-08",
+	"main": "src/index.ts",
+	"name": "questfy",
+	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_id": "f2422aee-85d1-4bd9-92b2-e7bed455285c",
+			"database_name": "questfy-db"
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+}
