@@ -1,4 +1,4 @@
-import routeUser from 'routes/user.js';
+import routeUser from './routes/user.js';
 
 export default {
   async fetch(request, env) {
