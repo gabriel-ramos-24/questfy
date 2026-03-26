@@ -1,0 +1,34 @@
+export async function existeUsuario(email, env) {
+    try {
+        const user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
+
+        if (user) return { existe: true, status: 200 };
+
+        return { existe: false, status: 200 };
+
+    } catch (error) {
+        console.error("Erro ao verificar existência de usuário: ", error);
+        return { existe: false, status: 500 };
+    }
+}
+
+export async function criarUsuario(dados, hash, salt, env) {
+    try {
+        await env.DB.prepare("INSERT INTO users (email, nome, hash, salt) VALUES (?, ?, ?, ?)").bind(dados.email, dados.nome, hash, salt).run();
+        return { body: { mensagem: "Cadastro efetuado com sucesso!"}, status: 201 };
+
+    } catch (error) {
+        console.error("Erro ao criar usuário: ", error);
+        return { body: { mensagem: "Não foi possível criar usuário devido a erro interno."}, status: 500 };
+    }
+}
+
+export async function obterSaltHash(email, env) {
+    try {
+        return env.DB.prepare("SELECT salt, hash FROM users WHERE email = ?").bind(email).first();
+
+    } catch (error) {
+        console.error("Erro ao obter dados do salt e hash do usuário: ", error);
+        return Response.json({ mensagem: "Não foi possível criar usuário devido a erro interno.", criado: false }, { status: 500 });
+    }
+}
