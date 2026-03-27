@@ -1,35 +1,6 @@
 import { emailValido, nomeValido, codigoValido, senhaValida } from '../utils/user.js';
-import { validarToken, hashSenha, verificarSenha, gerarToken } from '../utils/auth.js';
-import { criarUsuario, existeUsuario, obterSenhaHash } from '../db/database.js';
-
-
-export async function getUser(userData, env) {
-
-    // 1° passo: dados mínimos para procurar um usuário
-    if (!userData.email ||
-        !userData.senha ||
-        !userData.token) return { body: { mensagem: "Dados inválidos" }, status: 400 };
-
-    // 2° passo: É um email válido?
-    if (!emailValido(userData.email)) return { body: { mensagem: "Email inválido" }, status: 400 };
-
-    // 3° passo: Já existe cadastro?
-    const { existe, status } = await existeUsuario(userData.email, env);
-    if (status === 500) return { body: { mensagem: "Erro interno" }, status: 500 };
-    if (!existe) return { body: { mensagem: "Email ou senha incorretos" }, status: 404 };
-
-    // 4° passo: A senha está correta?
-    const senhaHash = await obterSenhaHash(userData.email, env);
-    const senhaValida = await verificarSenha(userData.senha, senhaHash);
-    if (!senhaValida) return { body: { mensagem: "Email ou senha incorretos" }, status: 400 };
-
-    // 5° passo: O token está válido?
-    const boolToken = await validarToken(userData.token, userData.codigo);
-    if (!boolToken) return { body: { mensagem: "Token inválido" }, status: 400 };
-
-    // 6° passo: Obter usuário
-
-}
+import { validarToken, criptografarInfo, gerarToken } from '../utils/auth.js';
+import { criarUsuario, existeUsuario } from '../db/database.js';
 
 export async function createUser(userData, env) {
 
@@ -58,7 +29,7 @@ export async function createUser(userData, env) {
     if (payloadToken.email !== userData.email) return { body: { mensagem: "Token inválido" }, status: 400 };
 
     // 7° passo: transformar senha usando bcryptjs
-    const senhaCriptografada = await hashSenha(userData.senha);
+    const senhaCriptografada = await criptografarInfo(userData.senha);
 
     // 8° passo: verificar duplicidade de usuário
     const existeUsuarioResultado = await existeUsuario(userData.email, env);
@@ -71,7 +42,7 @@ export async function createUser(userData, env) {
 
     // 10° passo: Criar token de persistência longa para fazer login sem verificação de email
     const privateClaims = { nome: userData.nome, email: userData.email }
-    const token = gerarToken(privateClaims, env, 60 * 60 * 24);
+    const token = await gerarToken(privateClaims, env, 60 * 60 * 24);
 
     // 11° passo: Retornar para usuário
     return { body: { mensagem: "Usuário criado com sucesso!", token: token }, status: 201 };

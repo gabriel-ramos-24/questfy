@@ -25,10 +25,18 @@ export async function criarUsuario(dados, senhaCriptografada, env) {
 
 export async function obterSenhaHash(email, env) {
     try {
-        return env.DB.prepare("SELECT senha FROM users WHERE email = ?").bind(email).first();
-
+        const senha = await env.DB.prepare("SELECT senha FROM users WHERE email = ?").bind(email).first();
+        return { senha: senha, status: 400 };
     } catch (error) {
-        console.error("Erro ao obter dados do salt e hash do usuário: ", error);
-        return Response.json({ mensagem: "Não foi possível criar usuário devido a erro interno.", criado: false }, { status: 500 });
+        console.error("Erro ao obter senha do usuário: ", error);
+        return { status: 500 };
     }
+}
+
+export async function inserirCodigo(email, codigo, env) {
+    
+}
+
+export async function obterCodigo(email) {
+    
 }

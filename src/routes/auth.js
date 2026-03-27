@@ -13,8 +13,8 @@ export default async function routeAuth(request, env) {
         }
 
         if (request.method === "POST") {
-            const userAuth = await request.json();
-            const result = await authService.loginAuth(env, userAuth);
+            const userData = await request.json();
+            const result = await authService.loginAuth(env, userData);
             return Response.json(result.body, { status: result.status });
 
         }
