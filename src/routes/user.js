@@ -5,12 +5,6 @@ export default async function routeUser(request, env) {
     try {
         const userData = await request.json();
 
-        if (request.method === "GET") {
-
-            return userService.getUser(userData, env);
-
-        }
-
         if (request.method === "POST") {
             const result = await userService.createUser(userData, env);
             return Response.json(result.body, { status: result.status });

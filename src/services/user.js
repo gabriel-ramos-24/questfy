@@ -1,5 +1,5 @@
 import { emailValido, nomeValido, codigoValido, senhaValida } from '../utils/user.js';
-import { tokenValido, hashSenha, verificarSenha } from '../utils/auth.js';
+import { validarToken, hashSenha, verificarSenha, gerarToken } from '../utils/auth.js';
 import { criarUsuario, existeUsuario, obterSenhaHash } from '../db/database.js';
 
 
@@ -8,23 +8,23 @@ export async function getUser(userData, env) {
     // 1° passo: dados mínimos para procurar um usuário
     if (!userData.email ||
         !userData.senha ||
-        !userData.token) return { body: { mensagem: "Dados inválidos." }, status: 400 };
+        !userData.token) return { body: { mensagem: "Dados inválidos" }, status: 400 };
 
     // 2° passo: É um email válido?
     if (!emailValido(userData.email)) return { body: { mensagem: "Email inválido" }, status: 400 };
 
     // 3° passo: Já existe cadastro?
     const { existe, status } = await existeUsuario(userData.email, env);
-    if (status === 500) return { body: { mensagem: "Erro interno." }, status: 500 };
-    if (!existe) return { body: { mensagem: "Email ou senha incorretos." }, status: 404 };
+    if (status === 500) return { body: { mensagem: "Erro interno" }, status: 500 };
+    if (!existe) return { body: { mensagem: "Email ou senha incorretos" }, status: 404 };
 
     // 4° passo: A senha está correta?
     const senhaHash = await obterSenhaHash(userData.email, env);
     const senhaValida = await verificarSenha(userData.senha, senhaHash);
-    if (!senhaValida) return { body: { mensagem: "Email ou senha incorretos." }, status: 400 };
+    if (!senhaValida) return { body: { mensagem: "Email ou senha incorretos" }, status: 400 };
 
     // 5° passo: O token está válido?
-    const boolToken = await tokenValido(userData.token, userData.codigo);
+    const boolToken = await validarToken(userData.token, userData.codigo);
     if (!boolToken) return { body: { mensagem: "Token inválido" }, status: 400 };
 
     // 6° passo: Obter usuário
@@ -38,7 +38,7 @@ export async function createUser(userData, env) {
         !userData.email ||
         !userData.senha ||
         !userData.token ||
-        !userData.codigo) return { body: { mensagem: "Dados inválidos." }, status: 400 };
+        !userData.codigo) return { body: { mensagem: "Dados inválidos" }, status: 400 };
 
     // 2° passo: É um email válido?
     if (!emailValido(userData.email)) return { body: { mensagem: "Email inválido" }, status: 400 };
@@ -53,19 +53,27 @@ export async function createUser(userData, env) {
     if (!codigoValido(userData.codigo)) return { body: { mensagem: "Código inválido" }, status: 400 };
 
     // 6° passo: É um token válido?
-    const boolToken = await tokenValido(userData.token, userData.codigo);
-    if (!boolToken) return { body: { mensagem: "Token inválido" }, status: 400 };
+    const payloadToken = await validarToken(userData.token, env, userData.codigo);
+    if (!payloadToken) return { body: { mensagem: "Token inválido" }, status: 400 };
 
     // 7° passo: transformar senha usando bcryptjs
     const senhaCriptografada = await hashSenha(userData.senha);
 
     // 8° passo: verificar duplicidade de usuário
-    const { existe, status } = await existeUsuario(userData.email, env);
-    if (status === 500) return { body: { mensagem: "Erro interno." }, status: 500 };
-    if (existe) return { body: { mensagem: "Não foi possível realizar o cadastro." }, status: 409 };
+    const existeUsuarioResultado = await existeUsuario(userData.email, env);
+    if (existeUsuarioResultado.status === 500) return { body: { mensagem: "Erro interno" }, status: 500 };
+    if (existeUsuarioResultado.existe) return { body: { mensagem: "Não foi possível realizar o cadastro" }, status: 409 };
 
     // 9° passo: Criar usuário
-    return criarUsuario(userData, senhaCriptografada, env);
+    const criarUsuarioResultado = await criarUsuario(userData, senhaCriptografada, env);
+    if (criarUsuarioResultado.status !== 201) return { body: { mensagem: "Erro interno" }, status: 500 };
+
+    // 10° passo: Criar token de persistência longa para fazer login sem verificação de email
+    const privateClaims = { nome: userData.nome, email: userData.email }
+    const token = gerarToken(privateClaims, env, 60 * 60 * 24);
+
+    // 11° passo: Retornar para usuário
+    return { body: { mensagem: "Usuário criado com sucesso!", token: token }, status: 201 };
 }
 
 export function pathUser(userData, env) {

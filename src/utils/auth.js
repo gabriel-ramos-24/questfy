@@ -9,8 +9,67 @@ export async function verificarSenha(senha, hash) {
   return await bcrypt.compare(senha, hash);
 }
 
-export async function enviarEmail(email, codigo) {
+export async function enviarEmail(email, env) {
 
+  const codigo = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // env.API_SENDEMAIL_KEY svefjeo4dw3r4235f2s
+  
+  try {
+
+    const response = await fetch(
+      "https://script.google.com/macros/s/AKfycbx5naNWZKS1sgu16iCiy3SUONYAAsaJBa3z1bUoqBxiSyZ5r04yuFlAxwcI1712Y7WKQQ/exec",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          codigo: codigo,
+          apiKey: "svefjeo4dw3r4235f2s"
+        }),
+      }
+    );
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        status: 502,
+        message: "Resposta inválida do serviço de email"
+      };
+    }
+
+    if (!data.success) {
+      return {
+        success: false,
+        status: data.status || 500,
+        message: data.message || "Erro no serviço de email",
+        response: data
+      };
+    }
+
+    return {
+      success: true,
+      status: 200,
+      codigo,
+      response: data
+    };
+
+  } catch (error) {
+    console.log(error.toString());
+
+    return {
+      success: false,
+      status: 500,
+      message: error.name === "AbortError"
+        ? "Timeout ao enviar email"
+        : "Erro na requisição",
+      error: error.toString()
+    };
+  }
 }
 
 export async function gerarToken(privateClaims, env, expiracao) {
@@ -23,13 +82,15 @@ export async function gerarToken(privateClaims, env, expiracao) {
     "exp": agoraUTC + expiracao
   }
 
-  return jwt.sign(payload, env.JWT_SECRET);
+  // env.JWT_SECRET
+  return jwt.sign(payload, "3f25893f4kjf09f35f09");
 
 }
 
 export async function validarToken(token, env, codigo = null) {
 
-  const isValid = await jwt.verify(token, env.JWT_SECRET);
+  // env.JWT_SECRET
+  const isValid = await jwt.verify(token, "3f25893f4kjf09f35f09");
 
   if (!isValid) return null;
 
@@ -44,29 +105,4 @@ export async function validarToken(token, env, codigo = null) {
   }
 
   return payload;
-}
-
-export async function tokenValido(token, codigo) {
-  try {
-    const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbxAp0jI1Do_3jMjC2soiV9STQXTbdouipUDZna-lcdTA-M4e8eCLLfBCacwETCQSWje/exec',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          acao: 'verificar_email',
-          token: token,
-          code: codigo,
-        }),
-      }
-    );
-
-    const texto = await response.text();
-    const responseJSON = JSON.parse(texto);
-
-    return responseJSON.ok;
-
-  } catch (error) {
-    console.log('erro:', error);
-    return false;
-  }
 }

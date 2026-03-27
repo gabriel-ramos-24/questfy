@@ -1,4 +1,5 @@
 import routeUser from './routes/user.js';
+import routeAuth from './routes/auth.js';
 
 export default {
   async fetch(request, env) {
@@ -8,7 +9,11 @@ export default {
     if (url.pathname.startsWith("/user"))
       return routeUser(request, env);
 
-    return Response.json({ mensagem: "Rota inexistente." }, { status: 404 });
+    // Autenticação - Envio de email e login
+    if (url.pathname.startsWith("/auth"))
+      return routeAuth(request, env);
+
+    return Response.json({ mensagem: "Rota inexistente" }, { status: 404 });
 
   }
 };
