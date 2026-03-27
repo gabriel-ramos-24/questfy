@@ -12,8 +12,6 @@ export async function verificarSenha(senha, hash) {
 export async function enviarEmail(email, env) {
 
   const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-
-  // env.API_SENDEMAIL_KEY svefjeo4dw3r4235f2s
   
   try {
 
@@ -25,7 +23,7 @@ export async function enviarEmail(email, env) {
         body: JSON.stringify({
           email: email,
           codigo: codigo,
-          apiKey: "svefjeo4dw3r4235f2s"
+          apiKey: env.API_SENDEMAIL_KEY
         }),
       }
     );
@@ -82,15 +80,13 @@ export async function gerarToken(privateClaims, env, expiracao) {
     "exp": agoraUTC + expiracao
   }
 
-  // env.JWT_SECRET
-  return jwt.sign(payload, "3f25893f4kjf09f35f09");
+  return jwt.sign(payload, env.JWT_SECRET);
 
 }
 
 export async function validarToken(token, env, codigo = null) {
 
-  // env.JWT_SECRET
-  const isValid = await jwt.verify(token, "3f25893f4kjf09f35f09");
+  const isValid = await jwt.verify(token, env.JWT_SECRET);
 
   if (!isValid) return null;
 

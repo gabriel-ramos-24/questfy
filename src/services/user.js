@@ -55,6 +55,7 @@ export async function createUser(userData, env) {
     // 6° passo: É um token válido?
     const payloadToken = await validarToken(userData.token, env, userData.codigo);
     if (!payloadToken) return { body: { mensagem: "Token inválido" }, status: 400 };
+    if (payloadToken.email !== userData.email) return { body: { mensagem: "Token inválido" }, status: 400 };
 
     // 7° passo: transformar senha usando bcryptjs
     const senhaCriptografada = await hashSenha(userData.senha);
