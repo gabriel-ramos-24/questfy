@@ -24,5 +24,11 @@
       "binding": "DB",
       "database_id": "f2422aee-85d1-4bd9-92b2-e7bed455285c"
     }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "3c3fd90b904d4803bb882449c1e01c01"
+    }
   ]
 }
