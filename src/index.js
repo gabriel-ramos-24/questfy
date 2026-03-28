@@ -1,17 +1,21 @@
 import routeUser from './routes/user.js';
 import routeAuth from './routes/auth.js';
 
+const routes = [
+  { prefix: "/user", handler: routeUser },
+  { prefix: "/auth", handler: routeAuth },
+];
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // CRUD - Usuário
-    if (url.pathname.startsWith("/user"))
-      return routeUser(request, env);
-
-    // Autenticação - Envio de email e login
-    if (url.pathname.startsWith("/auth"))
-      return routeAuth(request, env);
+    for (const route of routes) {
+      if (url.pathname === route.prefix || url.pathname.startsWith(route.prefix + "/")) {
+        const subPath = url.pathname.slice(route.prefix.length) || "/";
+        return route.handler(request, env, subPath);
+      }
+    }
 
     return Response.json({ mensagem: "Rota inexistente" }, { status: 404 });
 

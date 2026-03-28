@@ -2,9 +2,9 @@ import { gerarToken, enviarEmail, validarToken } from '../utils/auth.js';
 import { emailValido } from '../utils/user.js';
 import { existeUsuario } from '../db/database.js';
 
-export async function sendEmailAuth(env, email = null) {
+export async function emailVerification(env, email = null) {
 
-    // 1° passo: Email na query é obrigatório
+    // 1° passo: Email no body é obrigatório
     if (!email) return { body: { mensagem: "Dados incompletos" }, status: 400 };
 
     // 2° passo: Enviar email
@@ -19,11 +19,11 @@ export async function sendEmailAuth(env, email = null) {
         };
     }
 
-    // 3° passo: Criar token
-    const privateClaims = { email: email, codigo: enviarEmailResultado.codigo }
-    const token = await gerarToken(privateClaims, env, 60 * 5);
+    // 3° passo: Salvar código em KV
+    
 
-    return { body: { mensagem: "Email enviado com sucesso", token: token }, status: 200 };
+
+    return { body: { mensagem: "Email enviado com sucesso" }, status: 200 };
 
 }
 

@@ -1,6 +1,6 @@
 import * as userService from "../services/user.js";
 
-export default async function routeUser(request, env) {
+export default async function routeUser(request, env, subPath) {
 
     try {
         const userData = await request.json();
@@ -13,9 +13,9 @@ export default async function routeUser(request, env) {
 
         if (request.method === "PATH") { }
         if (request.method === "DELETE") { }
-        return Response.json({ mensagem: "Rota inexistente." }, { status: 404 });
+        return Response.json({ mensagem: "Rota inexistente" }, { status: 404 });
     } catch (error) {
         console.log(error);
-        return Response.json({ mensagem: "Rota inexistente." }, { status: 404 });
+        return Response.json({ mensagem: "Erro interno" }, { status: 500 });
     }
 }
