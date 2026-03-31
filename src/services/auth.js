@@ -39,12 +39,12 @@ export async function loginAuth(env, userData) {
 
     // 3° passo: Já existe cadastro?
     const { existe, status } = await existeUsuario(userData.email, env);
-    if (status === 500) return { body: { mensagem: "Erro interno" }, status: 500 };
+    if (status === 500) return { body: { mensagem: "Erro interno - Parte do existeUsuario" }, status: 500 };
     if (!existe) return { body: { mensagem: "Email ou senha incorretos" }, status: 404 };
 
     // 4° passo: A senha está correta?
     const senhaHash = await obterSenhaHash(userData.email, env);
-    if (senhaHash.status === 500) return { body: { mensagem: "Erro interno" }, status: 500 };
+    if (senhaHash.status === 500) return { body: { mensagem: "Erro interno - Parte de obterSenhaHash" }, status: 500 };
     const senhaValida = await compararCriptografia(userData.senha, senhaHash.senha);
     if (!senhaValida) return { body: { mensagem: "Email ou senha incorretos" }, status: 400 };
 
