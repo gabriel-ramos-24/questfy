@@ -23,7 +23,7 @@ export async function enviarEmail(email, env) {
         body: JSON.stringify({
           email: email,
           codigo: codigo,
-          apiKey: env.API_SENDEMAIL_KEY
+          apiKey: "svefjeo4dw3r4235f2s"
         }),
       }
     );

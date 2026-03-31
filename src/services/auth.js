@@ -1,6 +1,7 @@
 import { gerarToken, enviarEmail, validarToken } from '../utils/auth.js';
 import { emailValido } from '../utils/user.js';
 import { existeUsuario } from '../db/database.js';
+import { dVerificadorValido, criarDVerificador } from '../db/keyvalue.js';
 
 export async function emailVerification(env, email = null) {
 
@@ -20,7 +21,8 @@ export async function emailVerification(env, email = null) {
     }
 
     // 3° passo: Salvar código em KV
-    
+    const result = await criarDVerificador(env, email, enviarEmailResultado.codigo);
+    if (!result) return { body: { mensagem: "Erro interno" }, status: 500 }
 
 
     return { body: { mensagem: "Email enviado com sucesso" }, status: 200 };
@@ -30,9 +32,7 @@ export async function emailVerification(env, email = null) {
 export async function loginAuth(env, userData) {
 
     // 1° passo: dados mínimos para procurar um usuário
-    if (!userData.email ||
-        !userData.senha ||
-        !userData.token) return { body: { mensagem: "Dados inválidos" }, status: 400 };
+    if (!userData.email || !userData.senha) return { body: { mensagem: "Dados inválidos" }, status: 400 };
 
     // 2° passo: É um email válido?
     if (!emailValido(userData.email)) return { body: { mensagem: "Email inválido" }, status: 400 };
@@ -48,9 +48,27 @@ export async function loginAuth(env, userData) {
     const senhaValida = await compararCriptografia(userData.senha, senhaHash.senha);
     if (!senhaValida) return { body: { mensagem: "Email ou senha incorretos" }, status: 400 };
 
-    // 5° passo: O token está válido?
-    const boolToken = await validarToken(userData.token, env);
-    if (!boolToken) return { body: { mensagem: "Token inválido" }, status: 400 };
+    // 5. Autenticação (token OU código)
+    if (userData.token) {
+        const valido = await validarToken(userData.token, env);
+        if (!valido) {
+            return { body: { mensagem: "Token inválido" }, status: 401 };
+        }
+    }
+    else if (userData.codigo) {
+        const valido = await dVerificadorValido(env, userData.email, userData.codigo);
+        if (!valido) {
+            return { body: { mensagem: "Código inválido" }, status: 401 };
+        }
+    }
+    else {
+        await emailVerification(env, userData.email);
+        return { body: { mensagem: "Código enviado" }, status: 401 };
+    }
 
-    // 6° passo: Obter usuário
+    // 6° passo: Refrash token
+    const token = await gerarToken({ email: userData.email }, env, (60 * 60 * 24 * 7));
+
+    // 7° passo: Login
+    return { body: { mensagem: "Login efetuado com sucesso", token: token }, status: 200 };
 }
