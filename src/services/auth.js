@@ -37,18 +37,22 @@ export async function loginAuth(env, userData) {
     // 2° passo: É um email válido?
     if (!emailValido(userData.email)) return { body: { mensagem: "Email inválido" }, status: 400 };
 
-    // 3° passo: Já existe cadastro?
-    const { existe, status } = await existeUsuario(userData.email, env);
-    if (status === 500) return { body: { mensagem: "Erro interno - Parte do existeUsuario" }, status: 500 };
-    if (!existe) return { body: { mensagem: "Email ou senha incorretos" }, status: 404 };
+    // 3° passo: A senha está correta?
+    const senhaResult = await obterSenhaHash(userData.email, env);
+    if (senhaResult.status === 500) return { body: { mensagem: "Erro interno - Parte de obterSenhaHash" }, status: 500 };
+    if (senhaResult.status !== 200 || !senhaResult.senha) {
+        return { body: { mensagem: "Email ou senha incorretos" }, status: 401 };
+    }
+    const senhaValida = await compararCriptografia(
+        userData.senha,
+        senhaResult.senha
+    );
 
-    // 4° passo: A senha está correta?
-    const senhaHash = await obterSenhaHash(userData.email, env);
-    if (senhaHash.status === 500) return { body: { mensagem: "Erro interno - Parte de obterSenhaHash" }, status: 500 };
-    const senhaValida = await compararCriptografia(userData.senha, senhaHash.senha);
-    if (!senhaValida) return { body: { mensagem: "Email ou senha incorretos" }, status: 400 };
+    if (!senhaValida) {
+        return { body: { mensagem: "Email ou senha incorretos" }, status: 401 };
+    }
 
-    // 5. Autenticação (token OU código)
+    // 4. Autenticação (token OU código)
     if (userData.token) {
         const valido = await validarToken(userData.token, env);
         if (!valido) {
@@ -66,9 +70,9 @@ export async function loginAuth(env, userData) {
         return { body: { mensagem: "Código enviado" }, status: 401 };
     }
 
-    // 6° passo: Refrash token
+    // 5° passo: Refrash token
     const token = await gerarToken({ email: userData.email }, env, (60 * 60 * 24 * 7));
 
-    // 7° passo: Login
+    // 6° passo: Login
     return { body: { mensagem: "Login efetuado com sucesso", token: token }, status: 200 };
 }
