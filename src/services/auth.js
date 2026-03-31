@@ -1,6 +1,7 @@
 import { gerarToken, enviarEmail, validarToken } from '../utils/auth.js';
 import { emailValido } from '../utils/user.js';
-import { existeUsuario } from '../db/database.js';
+import { compararCriptografia } from '../utils/auth.js';
+import { obterSenhaHash } from '../db/database.js';
 import { dVerificadorValido, criarDVerificador } from '../db/keyvalue.js';
 
 export async function emailVerification(env, email = null) {
@@ -39,7 +40,7 @@ export async function loginAuth(env, userData) {
 
     // 3° passo: A senha está correta?
     const senhaResult = await obterSenhaHash(userData.email, env);
-    if (senhaResult.status === 500) return { body: { mensagem: "Erro interno - Parte de obterSenhaHash" }, status: 500 };
+    if (senhaResult.status === 500) return { body: { mensagem: "Erro interno" }, status: 500 };
     if (senhaResult.status !== 200 || !senhaResult.senha) {
         return { body: { mensagem: "Email ou senha incorretos" }, status: 401 };
     }
