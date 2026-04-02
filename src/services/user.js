@@ -7,6 +7,7 @@ export async function getUser(email, env) {
     const existeUsuarioResultado = await existeUsuario(email, env);
     if (existeUsuarioResultado.status === 500) return { body: { mensagem: "Erro interno" }, status: 500 };
     if (existeUsuarioResultado.existe) return { body: { mensagem: "Email já cadastrado" }, status: 409 };
+    return { body: { mensagem: "Email liberado" }, status: 200 };
 }
 
 export async function createUser(userData, env) {
