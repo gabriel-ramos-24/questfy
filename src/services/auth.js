@@ -68,7 +68,7 @@ export async function loginAuth(env, userData) {
     }
     else {
         await emailVerification(env, userData.email);
-        return { body: { mensagem: "Código enviado" }, status: 401 };
+        return { body: { mensagem: "Código enviado" }, status: 400 };
     }
 
     // 5° passo: Refrash token
