@@ -3,9 +3,17 @@ import * as userService from "../services/user.js";
 export default async function routeUser(request, env, subPath) {
 
     try {
-        const userData = await request.json();
+
+        if (request.method === "GET") {
+            const url = new URL(request.url);
+            const email = url.searchParams.get("email");
+            const result = await userService.getUser(email, env);
+            return Response.json(result.body, { status: result.status });
+
+        }
 
         if (request.method === "POST") {
+            const userData = await request.json();
             const result = await userService.createUser(userData, env);
             return Response.json(result.body, { status: result.status });
 

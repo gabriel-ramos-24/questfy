@@ -1,7 +1,13 @@
-import { emailValido, nomeValido, codigoValido, senhaValida } from '../utils/user.js';
+import { emailValido, nomeValido, senhaValida } from '../utils/user.js';
 import { criptografarInfo, gerarToken } from '../utils/auth.js';
 import { criarUsuario, existeUsuario } from '../db/database.js';
 import { dVerificadorValido } from '../db/keyvalue.js';
+
+export async function getUser(email, env) {
+    const existeUsuarioResultado = await existeUsuario(email, env);
+    if (existeUsuarioResultado.status === 500) return { body: { mensagem: "Erro interno" }, status: 500 };
+    if (existeUsuarioResultado.existe) return { body: { mensagem: "Email já cadastrado" }, status: 409 };
+}
 
 export async function createUser(userData, env) {
 
