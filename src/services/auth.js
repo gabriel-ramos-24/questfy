@@ -57,7 +57,8 @@ export async function loginAuth(env, userData) {
     if (userData.token) {
         const payload = await validarToken(userData.token, env);
         if (!payload || payload.email !== userData.email) {
-            return { body: { mensagem: "Token inválido" }, status: 401 };
+            await emailVerification(env, userData.email);
+            return { body: { mensagem: "Token inválido" }, status: 400 };
         }
     }
     else if (userData.codigo) {
