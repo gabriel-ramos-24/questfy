@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "@tsndr/cloudflare-worker-jwt";
 
 export async function criptografarInfo(senha) {
-  return await bcrypt.hash(senha, 10);
+  return await bcrypt.hash(senha, 4);
 }
 
 export async function compararCriptografia(senha, hash) {
