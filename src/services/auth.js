@@ -1,7 +1,7 @@
 import { gerarToken, enviarEmail, validarToken } from '../utils/auth.js';
 import { emailValido } from '../utils/user.js';
-import { compararCriptografia } from '../utils/auth.js';
-import { obterSenhaHash } from '../db/database.js';
+import { criptografarInfo, compararCriptografia } from '../utils/auth.js';
+import { trocarSenha, obterSenhaHash, existeUsuario } from '../db/database.js';
 import { dVerificadorValido, criarDVerificador } from '../db/keyvalue.js';
 
 async function senhaCorreta(env, email, senha) {
@@ -91,5 +91,33 @@ export async function loginAuth(env, userData) {
         console.log('Erro ao logar: ', error);
         return { body: { mensagem: "Erro interno" }, status: 500 }
 
+    }
+}
+
+export async function passwordAuth(env, userData) {
+    try {
+        if (!userData?.email || !userData?.senha || !userData?.codigo) return { body: { mensagem: "Dados inválidos" }, status: 400 };
+        if (!emailValido(userData.email)) return { body: { mensagem: "Email inválido" }, status: 400 };
+        const email = userData.email.toLowerCase();
+
+        const dVerificador = await dVerificadorValido(env, email, userData.codigo);
+        if (!dVerificador) return { body: { mensagem: "Código inválido" }, status: 400 };
+
+        const senhaCriptografada = await criptografarInfo(userData.senha);
+
+        const existeUsuarioResultado = await existeUsuario(email, env);
+        if (existeUsuarioResultado.status === 500) return { body: { mensagem: "Erro interno" }, status: 500 };
+        if (!existeUsuarioResultado.existe) return { body: { mensagem: "Não foi possível realizar a troca da senha" }, status: 404 };
+
+        const trocouSenha = await trocarSenha(email, senhaCriptografada, env);
+
+        if (!trocouSenha.ok) return { body: { mensagem: "Erro interno" }, status: 500 }
+
+        const token = await gerarToken({ email: email }, env, (60 * 60 * 24 * 7));
+
+        return { body: { mensagem: "Senha alterada", token: token }, status: 200 }
+
+    } catch (error) {
+        console.log('Erro ao trocar senha: ', error); return { body: { mensagem: "Erro interno" }, status: 500 }
     }
 }

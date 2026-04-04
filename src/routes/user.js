@@ -19,7 +19,7 @@ export default async function routeUser(request, env, subPath) {
 
         }
 
-        if (request.method === "PATH") { }
+        if (request.method === "PATCH") { }
         if (request.method === "DELETE") { }
         return Response.json({ mensagem: "Rota inexistente" }, { status: 404 });
     } catch (error) {

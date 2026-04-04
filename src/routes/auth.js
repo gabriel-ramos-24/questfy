@@ -23,6 +23,12 @@ export default async function routeAuth(request, env, subPath) {
 
         }
 
+        if (subPath === "/password" && request.method === "PATCH") {
+            const result = await authService.passwordAuth(env, userData);
+            return Response.json(result.body, { status: result.status });
+
+        }
+
 
         return Response.json({ mensagem: "Rota inexistente" }, { status: 404 });
     } catch (error) {
