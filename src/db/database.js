@@ -47,11 +47,11 @@ export async function criarUsuario(dados, senhaCriptografada, env) {
 
 export async function trocarSenha(email, senhaCriptografada, env) {
     try {
-        await env.DB.prepare("UPDATE users SET senha = ? WHERE email = ?").bind(senhaCriptografada, email).run();
+        const result = await env.DB.prepare("UPDATE users SET senha = ? WHERE email = ?").bind(senhaCriptografada, email).run();
         if (result.meta.changes === 0) {
             return { ok: false, status: 404 };
         }
-        return { ok: false, status: 200 };
+        return { ok: true, status: 200 };
 
     } catch (error) {
         console.error("Erro ao criar usuário: ", error);

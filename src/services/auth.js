@@ -118,6 +118,7 @@ export async function passwordAuth(env, userData) {
         return { body: { mensagem: "Senha alterada", token: token }, status: 200 }
 
     } catch (error) {
-        console.log('Erro ao trocar senha: ', error); return { body: { mensagem: "Erro interno" }, status: 500 }
+        console.log('Erro ao trocar senha: ', error); 
+        return { body: { mensagem: "Erro interno" }, status: 500 }
     }
 }
