@@ -61,8 +61,10 @@ export async function tokenAuth(env, token = null) {
     const isValidToken = await validarToken(token, env);
 
     if (!isValidToken) return { body: { mensagem: "Token inválido" }, status: 400 };
+    
+    const token = await gerarToken({ email: isValidToken.email}, env, (60 * 60 * 24 * 7));
 
-    return { body: { mensagem: "Token válido" }, status: 200 };
+    return { body: { mensagem: "Token válido", token: token  }, status: 200 };
 
 }
 
