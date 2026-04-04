@@ -61,29 +61,35 @@ export async function tokenAuth(env, token = null) {
     const isValidToken = await validarToken(token, env);
 
     if (!isValidToken) return { body: { mensagem: "Token inválido" }, status: 400 };
-    
-    const token = await gerarToken({ email: isValidToken.email}, env, (60 * 60 * 24 * 7));
 
-    return { body: { mensagem: "Token válido", token: token  }, status: 200 };
+    const token = await gerarToken({ email: isValidToken.email }, env, (60 * 60 * 24 * 7));
+
+    return { body: { mensagem: "Token válido", token: token }, status: 200 };
 
 }
 
 export async function loginAuth(env, userData) {
 
-    // 1° passo: dados mínimos para procurar um usuário
-    if (!userData.email || !userData.senha) return { body: { mensagem: "Dados inválidos" }, status: 400 };
+    try {
+        // 1° passo: dados mínimos para procurar um usuário
+        if (!userData?.email || !userData?.senha) return { body: { mensagem: "Dados inválidos" }, status: 400 };
 
-    // 2° passo: É um email válido?
-    if (!emailValido(userData.email)) return { body: { mensagem: "Email inválido" }, status: 400 };
-    userData.email = (userData.email).toLowerCase()
+        // 2° passo: É um email válido?
+        if (!emailValido(userData.email)) return { body: { mensagem: "Email inválido" }, status: 400 };
+        const email = userData.email.toLowerCase();
 
-    // 3° passo: Email e senha estão corretos?
-    const senhaResult = await senhaCorreta(userData.email, userData.senha);
-    if (!senhaResult.ok) return { body: { mensagem: "Email ou senha incorretos" }, status: 401 };
+        // 3° passo: Email e senha estão corretos?
+        const senhaResult = await senhaCorreta(env, email, userData.senha);
+        if (!senhaResult.ok) return { body: { mensagem: "Email ou senha incorretos" }, status: 401 };
 
-    // 5° passo: Refrash token
-    const token = await gerarToken({ email: userData.email }, env, (60 * 60 * 24 * 7));
+        // 5° passo: Refrash token
+        const token = await gerarToken({ email: email }, env, (60 * 60 * 24 * 7));
 
-    // 6° passo: Login
-    return { body: { mensagem: "Login efetuado com sucesso", token: token }, status: 200 };
+        // 6° passo: Login
+        return { body: { mensagem: "Login efetuado com sucesso", token: token }, status: 200 };
+    } catch (error) {
+        console.log('Erro ao logar: ', error);
+        return { body: { mensagem: "Erro interno" }, status: 500 }
+
+    }
 }
