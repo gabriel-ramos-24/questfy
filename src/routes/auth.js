@@ -6,7 +6,13 @@ export default async function routeAuth(request, env, subPath) {
         const userData = await request.json();
 
         if (subPath === "/email/verification" && request.method === "POST") {
-            const result = await authService.emailVerification(env, userData.email);
+            const result = await authService.emailAuth(env, userData.email);
+            return Response.json(result.body, { status: result.status });
+
+        }
+
+        if (subPath === "/token/verification" && request.method === "POST") {
+            const result = await authService.tokenAuth(env, userData.token);
             return Response.json(result.body, { status: result.status });
 
         }
@@ -16,6 +22,7 @@ export default async function routeAuth(request, env, subPath) {
             return Response.json(result.body, { status: result.status });
 
         }
+
 
         return Response.json({ mensagem: "Rota inexistente" }, { status: 404 });
     } catch (error) {

@@ -84,7 +84,7 @@ export async function gerarToken(privateClaims, env, expiracao) {
 
 }
 
-export async function validarToken(token, env, codigo = null) {
+export async function validarToken(token, env) {
 
   const isValid = await jwt.verify(token, env.JWT_SECRET);
 
@@ -95,10 +95,6 @@ export async function validarToken(token, env, codigo = null) {
   if (!decoded || !decoded.payload) return null;
 
   const payload = decoded.payload;
-
-  if (codigo !== null && payload.codigo !== codigo) {
-    return null;
-  }
 
   return payload;
 }

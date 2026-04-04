@@ -3,7 +3,7 @@ export async function existeUsuario(email, env) {
 
         const user = await env.DB
             .prepare("SELECT 1 FROM users WHERE email = ?")
-            .bind(email.toLowerCase())
+            .bind(email)
             .first();
 
         return { existe: !!user, status: 200 };
@@ -19,7 +19,7 @@ export async function obterSenhaHash(email, env) {
     try {
         const result = await env.DB
             .prepare("SELECT senha FROM users WHERE email = ?")
-            .bind(email.toLowerCase())
+            .bind(email)
             .first();
 
         if (!result) {
@@ -36,7 +36,7 @@ export async function obterSenhaHash(email, env) {
 
 export async function criarUsuario(dados, senhaCriptografada, env) {
     try {
-        await env.DB.prepare("INSERT INTO users (email, nome, senha) VALUES (?, ?, ?)").bind(dados.email.toLowerCase(), dados.nome, senhaCriptografada).run();
+        await env.DB.prepare("INSERT INTO users (email, nome, senha) VALUES (?, ?, ?)").bind(dados.email, dados.nome, senhaCriptografada).run();
         return { status: 201 };
 
     } catch (error) {
