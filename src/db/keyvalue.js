@@ -1,12 +1,12 @@
 import { criptografarInfo, compararCriptografia } from '../utils/auth.js';
 
 export async function dVerificadorValido(env, email, codigo) {
-    const result = await env.KV.get(`codigo:${email}`, { type: "json" });
+    const result = await env.KV.get(`codigo:${email.toLowerCase()}`, { type: "json" });
     if (!result) return false;
     const isValid = await compararCriptografia(codigo, result.codigo);
     if (!isValid) return false;
 
-    await env.KV.delete(`codigo:${email}`);
+    await env.KV.delete(`codigo:${email.toLowerCase()}`);
     return true;
 
 }
@@ -15,7 +15,7 @@ export async function criarDVerificador(env, email, codigo) {
     try {
         const codigoCrypt = await criptografarInfo(codigo);
         await env.KV.put(
-            `codigo:${email}`,
+            `codigo:${email.toLowerCase()}`,
             JSON.stringify({ codigo: codigoCrypt }),
             { expirationTtl: 300 }
         );
