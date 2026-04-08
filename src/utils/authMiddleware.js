@@ -23,6 +23,7 @@ export default async function requireAuth(request) {
 
   try {
     const payload = await validarToken(token);
+    console.log('Recebendo o payload da validação: ', payload);
 
     return {
       ok: true,
