@@ -13,17 +13,11 @@ export async function getRoadData(env, email) {
     try {
         const result = await getRoad(env, email);
 
-        if (!result) {
+        if (!result.body.ok) {
             return await createRoadData(env, email);
         }
 
-        return {
-            body: {
-                ok: true,
-                data: result
-            },
-            status: 200
-        };
+        return result;
 
     } catch (error) {
         console.log(error);
@@ -42,13 +36,7 @@ async function createRoadData(env, email) {
             throw new Error("Erro ao criar trilha no banco de dados.");
         }
 
-        return {
-            body: {
-                ok: true,
-                data: roadPadrao
-            },
-            status: 200
-        };
+        return created;
 
     } catch (error) {
         console.log(error);
