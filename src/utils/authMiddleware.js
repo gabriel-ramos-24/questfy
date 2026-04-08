@@ -32,7 +32,7 @@ export default async function requireAuth(request) {
     return {
       ok: false,
       status: 401,
-      mensagem: "Token inválido",
+      mensagem: err,
     };
   }
 }
