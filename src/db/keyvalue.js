@@ -26,3 +26,45 @@ export async function criarDVerificador(env, email, codigo) {
     }
 
 }
+
+export async function getRoad(env, email) {
+    const result = await env.KV.get(`road:${email}`, { type: "json" });
+    if (!result) return {
+        body: {
+            ok: false,
+        },
+        status: 500
+    };
+
+    return {
+        body: {
+            ok: true,
+            data: result
+        },
+        status: 200
+    }
+}
+
+export async function createRoad(env, email, roadPadrao) {
+    try {
+        await env.KV.put(
+            `road:${email}`,
+            JSON.stringify(roadPadrao)
+        );
+        return {
+            body: {
+                ok: true,
+                data: roadPadrao
+            },
+            status: 200
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            body: {
+                ok: false,
+            },
+            status: 500
+        }
+    }
+}
