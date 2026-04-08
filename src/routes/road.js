@@ -4,7 +4,7 @@ import requireAuth from '../utils/authMiddleware.js';
 export default async function routeRoad(request, env, subPath) {
 
     try {
-        const auth = await requireAuth(request);
+        const auth = await requireAuth(request, env);
 
         if (!auth.ok) return Response.json({ mensagem: auth.mensagem }, { status: auth.status });
 

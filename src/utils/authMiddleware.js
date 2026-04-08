@@ -1,6 +1,6 @@
 import { validarToken } from "./auth";
 
-export default async function requireAuth(request) {
+export default async function requireAuth(request, env) {
   const authHeader = request.headers.get("Authorization");
 
   if (!authHeader) {
@@ -22,8 +22,7 @@ export default async function requireAuth(request) {
   }
 
   try {
-    const payload = await validarToken(token);
-    console.log('Recebendo o payload da validação: ', payload);
+    const payload = await validarToken(token, env);
 
     return {
       ok: true,
