@@ -1,4 +1,4 @@
-import { getRoad, createRoad } from '../db/keyvalue';
+import { getRoad, createRoad, updateRoad } from '../db/keyvalue';
 
 const roadPadrao = {
     exatas: '2020_150',
@@ -23,6 +23,55 @@ export async function getRoadData(env, email) {
         console.log(error);
         return {
             body: { ok: false, mensagem: "Erro interno ao buscar Trilha" },
+            status: 500
+        };
+    }
+}
+
+export async function updateRoadData(env, email, roadJSON = null) {
+    const keys = ['exatas', 'natureza', 'humanas', 'linguagens', 'erradas', 'favoritas'];
+
+    if (!roadJSON) return {
+        body: { ok: false, mensagem: "Dados incompletos" },
+        status: 400
+    };
+
+    let contador = 0;
+    for (const key of keys) {
+        if (Object.hasOwn(roadJSON, key)) {
+            contador += 1;
+        }
+    }
+
+    if (contador !== 1) return {
+        body: { ok: false, mensagem: "Estrutura incorreta" },
+        status: 400
+    };
+
+    try {
+
+        const result = await getRoad(env, email);
+        
+        if (!result.body?.ok) {
+            throw new Error('Erro ao buscar dados da trilha');
+        }
+
+        const roadNewData = { ...result.body.data, ...roadJSON };
+
+        const updateRoadResult = await updateRoad(env, email, roadNewData);
+
+        if (!updateRoadResult) throw new Error('Erro ao acessar e atualizar dados da Trilha');
+
+        return {
+            body: { ok: true, mensagem: 'Dados atualizados da Trilha' },
+            status: 200
+        };
+
+
+
+    } catch (error) {
+        return {
+            body: { ok: false, mensagem: error.message },
             status: 500
         };
     }

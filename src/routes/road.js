@@ -14,6 +14,13 @@ export default async function routeRoad(request, env, subPath) {
 
         }
 
+        if (request.method === "PATCH") {
+            const roadData = await request.json();
+            const result = await roadService.updateRoadData(env, auth.user.email, roadData);
+            return Response.json(result.body, { status: result.status });
+
+        }
+
         return Response.json({ mensagem: "Rota inexistente" }, { status: 404 });
     } catch (error) {
         console.log(error);

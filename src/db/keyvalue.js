@@ -68,3 +68,17 @@ export async function createRoad(env, email, roadPadrao) {
         }
     }
 }
+
+export async function updateRoad(env, email, roadNewData) {
+
+    try {
+
+        await env.KV.put(`road:${email}`, JSON.stringify(roadNewData));
+        return true
+    } catch (error) {
+
+        console.log(error);
+        return false;
+    }
+
+}
