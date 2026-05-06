@@ -8,7 +8,7 @@ const routes = [
   { prefix: "/road", handler: routeRoad },
 ];
 
-//teste 04.05.26 testes
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
