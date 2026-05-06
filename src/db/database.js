@@ -2,7 +2,7 @@ export async function existeUsuario(email, env) {
     try {
 
         const user = await env.DB
-            .prepare("SELECT 1 FROM users WHERE email = ?")
+            .prepare("SELECT 1 FROM usuarios WHERE email = ?")
             .bind(email)
             .first();
 
@@ -18,7 +18,7 @@ export async function existeUsuario(email, env) {
 export async function obterSenhaHash(email, env) {
     try {
         const result = await env.DB
-            .prepare("SELECT senha FROM users WHERE email = ?")
+            .prepare("SELECT senha FROM usuarios WHERE email = ?")
             .bind(email)
             .first();
 
@@ -36,7 +36,7 @@ export async function obterSenhaHash(email, env) {
 
 export async function criarUsuario(dados, senhaCriptografada, env) {
     try {
-        await env.DB.prepare("INSERT INTO users (email, nome, senha) VALUES (?, ?, ?)").bind(dados.email, dados.nome, senhaCriptografada).run();
+        await env.DB.prepare("INSERT INTO usuarios (email, nome, senha) VALUES (?, ?, ?)").bind(dados.email, dados.nome, senhaCriptografada).run();
         return { status: 201 };
 
     } catch (error) {
@@ -47,7 +47,7 @@ export async function criarUsuario(dados, senhaCriptografada, env) {
 
 export async function trocarSenha(email, senhaCriptografada, env) {
     try {
-        const result = await env.DB.prepare("UPDATE users SET senha = ? WHERE email = ?").bind(senhaCriptografada, email).run();
+        const result = await env.DB.prepare("UPDATE usuarios SET senha = ? WHERE email = ?").bind(senhaCriptografada, email).run();
         if (result.meta.changes === 0) {
             return { ok: false, status: 404 };
         }
