@@ -94,7 +94,7 @@ export async function atualizarDadosUsuario(email, dadosNovos, env) {
 export async function criarPost(dados, env) {
     try {
 
-        await env.DB
+        const resultado = await env.DB
             .prepare(`
                 INSERT INTO comunidade
                 (
@@ -113,13 +113,17 @@ export async function criarPost(dados, env) {
             )
             .run();
 
-        return { status: 201 };
+        return {
+            status: 201,
+            resultado
+        };
 
     } catch (error) {
 
-        console.error(error);
-
-        return { status: 500 };
+        return {
+            status: 500,
+            erro: error.message
+        };
     }
 }
 
