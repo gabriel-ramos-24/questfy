@@ -90,3 +90,190 @@ export async function atualizarDadosUsuario(email, dadosNovos, env) {
         return { ok: false, status: 500 };
     }
 }
+
+export async function criarPost(dados, env) {
+    try {
+
+        await env.DB
+            .prepare(`
+                INSERT INTO comunidade
+                (
+                    titulo,
+                    texto,
+                    email_autor,
+                    nome_autor
+                )
+                VALUES (?, ?, ?, ?)
+            `)
+            .bind(
+                dados.titulo,
+                dados.texto,
+                dados.email_autor,
+                dados.nome_autor
+            )
+            .run();
+
+        return { status: 201 };
+
+    } catch (error) {
+
+        console.error(error);
+
+        return { status: 500 };
+    }
+}
+
+export async function listarPosts(env) {
+    try {
+
+        const posts = await env.DB
+            .prepare(`
+                SELECT *
+                FROM comunidade
+                ORDER BY id DESC
+            `)
+            .all();
+
+        return {
+            posts: posts.results,
+            status: 200
+        };
+
+    } catch (error) {
+
+        console.error(error);
+
+        return {
+            posts: [],
+            status: 500
+        };
+    }
+}
+
+export async function listarMeusPosts(email, env) {
+    try {
+
+        const posts = await env.DB
+            .prepare(`
+                SELECT *
+                FROM comunidade
+                WHERE email_autor = ?
+                ORDER BY id DESC
+            `)
+            .bind(email)
+            .all();
+
+        return {
+            posts: posts.results,
+            status: 200
+        };
+
+    } catch (error) {
+
+        console.error(error);
+
+        return {
+            posts: [],
+            status: 500
+        };
+    }
+}
+
+export async function obterPost(id, env) {
+    try {
+
+        const post = await env.DB
+            .prepare(`
+                SELECT *
+                FROM comunidade
+                WHERE id = ?
+            `)
+            .bind(id)
+            .first();
+
+        if (!post)
+            return {
+                ok: false,
+                status: 404
+            };
+
+        return {
+            ok: true,
+            post,
+            status: 200
+        };
+
+    } catch (error) {
+
+        console.error(error);
+
+        return {
+            ok: false,
+            status: 500
+        };
+    }
+}
+
+export async function atualizarPost(
+    id,
+    titulo,
+    texto,
+    env
+) {
+    try {
+
+        await env.DB
+            .prepare(`
+                UPDATE comunidade
+                SET titulo = ?, texto = ?
+                WHERE id = ?
+            `)
+            .bind(
+                titulo,
+                texto,
+                id
+            )
+            .run();
+
+        return {
+            ok: true,
+            status: 200
+        };
+
+    } catch (error) {
+
+        console.error(error);
+
+        return {
+            ok: false,
+            status: 500
+        };
+    }
+}
+
+export async function excluirPost(id, env) {
+    try {
+
+        await env.DB
+            .prepare(`
+                DELETE FROM comunidade
+                WHERE id = ?
+            `)
+            .bind(id)
+            .run();
+
+        return {
+            ok: true,
+            status: 200
+        };
+
+    } catch (error) {
+
+        console.error(error);
+
+        return {
+            ok: false,
+            status: 500
+        };
+    }
+}

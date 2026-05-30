@@ -1,11 +1,13 @@
 import routeUser from './routes/user.js';
 import routeAuth from './routes/auth.js';
 import routeRoad from './routes/road.js';
+import routeCommunity from './routes/community.js';
 
 const routes = [
   { prefix: "/user", handler: routeUser },
   { prefix: "/auth", handler: routeAuth },
   { prefix: "/road", handler: routeRoad },
+  { prefix: "/community", handler: routeCommunity },
 ];
 
 
