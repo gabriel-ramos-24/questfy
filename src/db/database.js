@@ -58,3 +58,19 @@ export async function trocarSenha(email, senhaCriptografada, env) {
         return { ok: false, status: 500 };
     }
 }
+
+export async function obterDadosUsuario(email, env) {
+    try {
+        const result = await env.DB
+            .prepare("SELECT email, nome FROM usuarios WHERE email = ?")
+            .bind(email)
+            .first();
+
+        if (!result) return { ok: false, status: 404 };
+        return { ok: true, dados: result, status: 200 };
+
+    } catch (error) {
+        console.error("Erro ao obter dados do usuário: ", error);
+        return { ok: false, status: 500 };
+    }
+}

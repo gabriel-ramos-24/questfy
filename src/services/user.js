@@ -1,6 +1,6 @@
 import { emailValido, nomeValido, senhaValida } from '../utils/user.js';
 import { criptografarInfo, gerarToken } from '../utils/auth.js';
-import { criarUsuario, existeUsuario } from '../db/database.js';
+import { criarUsuario, existeUsuario, obterDadosUsuario } from '../db/database.js';
 import { dVerificadorValido } from '../db/keyvalue.js';
 
 export async function getUser(email, env) {
@@ -68,7 +68,7 @@ export async function createUser(userData, env) {
 
         console.log('Algum erro aconteceu ao criar usuário: ', error);
         return { body: { mensagem: "Erro interno" }, status: 500 };
-        
+
     }
 }
 
@@ -78,4 +78,18 @@ export function pathUser(userData, env) {
 
 export function deleteUser(userData, env) {
 
+}
+
+// retorna os dados do usuário logado (usado pelo endpoint /user/me)
+export async function getCurrentUser(email, env) {
+    try {
+        const resultado = await obterDadosUsuario(email, env);
+        if (!resultado.ok) {
+            return { body: { mensagem: "Usuário não encontrado" }, status: resultado.status };
+        }
+        return { body: resultado.dados, status: 200 };
+    } catch (error) {
+        console.log('Erro ao buscar dados do usuário: ', error);
+        return { body: { mensagem: "Erro interno" }, status: 500 };
+    }
 }
