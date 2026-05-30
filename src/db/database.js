@@ -62,7 +62,7 @@ export async function trocarSenha(email, senhaCriptografada, env) {
 export async function obterDadosUsuario(email, env) {
     try {
         const result = await env.DB
-            .prepare("SELECT email, nome, foto FROM usuarios WHERE email = ?")
+            .prepare("SELECT email, nome, foto, premium FROM usuarios WHERE email = ?")
             .bind(email)
             .first();
 
@@ -275,5 +275,20 @@ export async function excluirPost(id, env) {
             ok: false,
             status: 500
         };
+    }
+}
+export async function atualizarPremium(email, premium, env) {
+    try {
+        const result = await env.DB
+            .prepare("UPDATE usuarios SET premium = ? WHERE email = ?")
+            .bind(premium, email)
+            .run();
+
+        if (result.meta.changes === 0) return { ok: false, status: 404 };
+        return { ok: true, status: 200 };
+
+    } catch (error) {
+        console.error("Erro ao atualizar premium: ", error);
+        return { ok: false, status: 500 };
     }
 }
