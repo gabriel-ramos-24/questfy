@@ -62,7 +62,7 @@ export async function trocarSenha(email, senhaCriptografada, env) {
 export async function obterDadosUsuario(email, env) {
     try {
         const result = await env.DB
-            .prepare("SELECT email, nome FROM usuarios WHERE email = ?")
+            .prepare("SELECT email, nome, foto FROM usuarios WHERE email = ?")
             .bind(email)
             .first();
 
@@ -71,6 +71,22 @@ export async function obterDadosUsuario(email, env) {
 
     } catch (error) {
         console.error("Erro ao obter dados do usuário: ", error);
+        return { ok: false, status: 500 };
+    }
+}
+
+export async function atualizarDadosUsuario(email, dadosNovos, env) {
+    try {
+        const result = await env.DB
+            .prepare("UPDATE usuarios SET nome = ?, foto = ? WHERE email = ?")
+            .bind(dadosNovos.nome, dadosNovos.foto, email)
+            .run();
+
+        if (result.meta.changes === 0) return { ok: false, status: 404 };
+        return { ok: true, status: 200 };
+
+    } catch (error) {
+        console.error("Erro ao atualizar usuário: ", error);
         return { ok: false, status: 500 };
     }
 }

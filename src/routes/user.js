@@ -26,7 +26,15 @@ export default async function routeUser(request, env, subPath) {
             return Response.json(result.body, { status: result.status });
         }
 
-        if (request.method === "PATCH") { }
+        // PATCH /user/me -> atualiza nome e foto do usuário logado
+        if (subPath === "/me" && request.method === "PATCH") {
+            const auth = await requireAuth(request, env);
+        if (!auth.ok) return Response.json({ mensagem: auth.mensagem }, { status: auth.status });
+
+            const dadosNovos = await request.json();
+            const result = await userService.updateUser(auth.user.email, dadosNovos, env);
+            return Response.json(result.body, { status: result.status });
+}
         if (request.method === "DELETE") { }
         return Response.json({ mensagem: "Rota inexistente" }, { status: 404 });
     } catch (error) {

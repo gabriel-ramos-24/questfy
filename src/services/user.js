@@ -1,6 +1,6 @@
 import { emailValido, nomeValido, senhaValida } from '../utils/user.js';
 import { criptografarInfo, gerarToken } from '../utils/auth.js';
-import { criarUsuario, existeUsuario, obterDadosUsuario } from '../db/database.js';
+import { criarUsuario, existeUsuario, obterDadosUsuario, atualizarDadosUsuario } from '../db/database.js';
 import { dVerificadorValido } from '../db/keyvalue.js';
 
 export async function getUser(email, env) {
@@ -90,6 +90,26 @@ export async function getCurrentUser(email, env) {
         return { body: resultado.dados, status: 200 };
     } catch (error) {
         console.log('Erro ao buscar dados do usuário: ', error);
+        return { body: { mensagem: "Erro interno" }, status: 500 };
+    }
+}
+
+// atualiza nome e foto do usuário logado
+export async function updateUser(email, dadosNovos, env) {
+    try {
+        if (!dadosNovos.nome) return { body: { mensagem: "Nome obrigatório" }, status: 400 };
+        if (!nomeValido(dadosNovos.nome)) return { body: { mensagem: "Nome inválido" }, status: 400 };
+
+        const resultado = await atualizarDadosUsuario(email, {
+            nome: dadosNovos.nome,
+            foto: dadosNovos.foto || null,
+        }, env);
+
+        if (!resultado.ok) return { body: { mensagem: "Erro ao atualizar" }, status: resultado.status };
+        return { body: { mensagem: "Usuário atualizado" }, status: 200 };
+
+    } catch (error) {
+        console.log('Erro ao atualizar usuário: ', error);
         return { body: { mensagem: "Erro interno" }, status: 500 };
     }
 }
