@@ -94,7 +94,7 @@ export async function createPost(email, dados, env) {
                 status: 404
             };
 
-        await criarPost(
+        const resultado = await criarPost(
             {
                 titulo: dados.titulo,
                 texto: dados.texto,
@@ -104,12 +104,19 @@ export async function createPost(email, dados, env) {
             env
         );
 
+        if (resultado.status !== 201)
+            return {
+                body: { mensagem: "Erro ao criar post" },
+                status: 500
+            };
+
         return {
             body: { mensagem: "Post criado com sucesso" },
             status: 201
         };
 
     } catch (error) {
+
         console.log(error);
 
         return {
