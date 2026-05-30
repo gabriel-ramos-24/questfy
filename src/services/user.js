@@ -1,6 +1,6 @@
 import { emailValido, nomeValido, senhaValida } from '../utils/user.js';
 import { criptografarInfo, gerarToken } from '../utils/auth.js';
-import { criarUsuario, existeUsuario, obterDadosUsuario, atualizarDadosUsuario } from '../db/database.js';
+import { criarUsuario, existeUsuario, obterDadosUsuario, atualizarDadosUsuario, atualizarPremium } from '../db/database.js';
 import { dVerificadorValido } from '../db/keyvalue.js';
 
 export async function getUser(email, env) {
@@ -110,6 +110,25 @@ export async function updateUser(email, dadosNovos, env) {
 
     } catch (error) {
         console.log('Erro ao atualizar usuário: ', error);
+        return { body: { mensagem: "Erro interno" }, status: 500 };
+    }
+}
+
+// atualiza o status premium do usuário (0 ou 1)
+export async function updatePremium(email, premium, env) {
+    try {
+        // valida que premium é 0 ou 1
+        if (premium !== 0 && premium !== 1) {
+            return { body: { mensagem: "Valor inválido" }, status: 400 };
+        }
+
+        const resultado = await atualizarPremium(email, premium, env);
+        if (!resultado.ok) return { body: { mensagem: "Erro ao atualizar" }, status: resultado.status };
+
+        return { body: { mensagem: "Premium atualizado", premium }, status: 200 };
+
+    } catch (error) {
+        console.log('Erro ao atualizar premium: ', error);
         return { body: { mensagem: "Erro interno" }, status: 500 };
     }
 }

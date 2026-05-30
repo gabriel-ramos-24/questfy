@@ -34,6 +34,16 @@ export default async function routeUser(request, env, subPath) {
             const dadosNovos = await request.json();
             const result = await userService.updateUser(auth.user.email, dadosNovos, env);
             return Response.json(result.body, { status: result.status });
+
+		// PATCH /user/me/premium -> atualiza apenas o status premium (0 ou 1)
+        if (subPath === "/me/premium" && request.method === "PATCH") {
+            const auth = await requireAuth(request, env);
+        if (!auth.ok) return Response.json({ mensagem: auth.mensagem }, { status: auth.status });
+
+            const { premium } = await request.json();
+            const result = await userService.updatePremium(auth.user.email, premium, env);
+            return Response.json(result.body, { status: result.status });
+}
 }
         if (request.method === "DELETE") { }
         return Response.json({ mensagem: "Rota inexistente" }, { status: 404 });
